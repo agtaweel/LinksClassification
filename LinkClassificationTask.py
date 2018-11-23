@@ -30,7 +30,7 @@ def open_link(link):
 
 corpus = []
 data = []
-for i in range(0, len(X)-1):
+for i in range(0, len(X)):
     content = open_link(''.join(X[i]))
     data.append(content)
     # print(str(content))
@@ -43,6 +43,7 @@ for i in range(0, len(X)-1):
     page = ' '.join(page)
     # print(page)
     corpus.append(page)
+    print(i)
 
 # Creating Bag of Words model
 from sklearn.feature_extraction.text import CountVectorizer
@@ -61,3 +62,4 @@ classifier.fit(X_train, y_train)
 
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
+
