@@ -15,8 +15,8 @@ nltk.download('stopwords')
 
 # Importing the dataset
 dataset = pd.read_csv('Dataset.csv')
-X = dataset.iloc[0:99, :-1].values
-y = dataset.iloc[0:99, 1].values
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, 1].values
 # X = pd.DataFrame(X)
 
 # Get link data
@@ -30,7 +30,7 @@ def open_link(link):
 
 corpus = []
 data = []
-for i in range(0, 100):
+for i in range(0, len(X)-1):
     content = open_link(''.join(X[i]))
     data.append(content)
     # print(str(content))
@@ -46,9 +46,9 @@ for i in range(0, 100):
 
 # Creating Bag of Words model
 from sklearn.feature_extraction.text import CountVectorizer
-cv = CountVectorizer(max_features = 1500)
+cv = CountVectorizer(max_features=1500)
 X = cv.fit_transform(corpus).toarray()
-y = dataset.iloc[0:99, 1].values
+y = dataset.iloc[:, 1].values
 
 # Splitting the dataset into the Training set and Test set
 from sklearn.model_selection import train_test_split
