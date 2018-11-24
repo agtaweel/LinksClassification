@@ -12,14 +12,16 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, f1_score
 
 nltk.download('stopwords')
 
 # Importing the dataset
+print('reading data')
 dataset = pd.read_csv('Dataset.csv')
-X = dataset.iloc[:, :-1].values
+x = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, 1].values
-
+print('data was read')
 # Get link data
 
 
@@ -29,36 +31,52 @@ def open_link(link):
     return page
 
 
-corpus = []
-for i in range(0, len(X)):
-    content = open_link(''.join(X[i]))
-    page = re.sub('[^\u0627-\u064a]', ' ', str(content))
-    page = page.lower()
-    page = page.split()
-    ps = PorterStemmer()
-    page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
-    page = ' '.join(page)
-    corpus.append(page)
+def train_data(x, dataset):
+    print('start training data')
+    corpus = []
+    for i in range(0, len(x)):
+        content = open_link(''.join(x[i]))
+        page = re.sub('[^\u0627-\u064a]', ' ', str(content))
+        page = page.lower()
+        page = page.split()
+        ps = PorterStemmer()
+        page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
+        page = ' '.join(page)
+        corpus.append(page)
+        print((i+1)/len(x)*100, '%')
 
-# Creating Bag of Words model
-cv = CountVectorizer(max_features=1500)
-X = cv.fit_transform(corpus).toarray()
-y = dataset.iloc[:, 1].values
+    # Creating Bag of Words model
+    cv = CountVectorizer(max_features=1500)
+    x = cv.fit_transform(corpus).toarray()
+    y = dataset.iloc[:, 1].values
 
-# Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, random_state=0)
+    # Splitting the dataset into the Training set and Test set
+    print('splitting data')
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.20, random_state=0)
 
-# Fitting Naive Bayes to the Training set
-classifier = GaussianNB()
-classifier.fit(X_train, y_train)
+    # Fitting Naive Bayes to the Training set
+    classifier = GaussianNB()
+    print('fitting data')
+    classifier.fit(x_train, y_train)
 
-# save the model to disk
-filename = 'finalized_model.sav'
-pickle.dump(classifier, open(filename, 'wb'))
-
-# Predicting the Test set results
-loaded_model = pickle.load(open(filename, 'rb'))
-score = loaded_model.score(X_test, y_test)
-
+    # save the model to disk
+    filename = 'finalized_model.sav'
+    pickle.dump(classifier, open(filename, 'wb'))
+    print('training finished')
+    return classifier, x_test, y_test
 
 
+def get_results(classifier, x_test, y_test):
+    # Predicting the Test set results
+    predictions = classifier.predict(x_test)
+    accuracy = accuracy_score(y_test, predictions)
+    score = f1_score(y_test,predictions)
+    print('testing results: ')
+    return score, accuracy
+
+
+if __name__ == "__main__":
+    classifier, x_test, y_test = train_data(x, dataset)
+    score, accuracy = get_results(classifier, x_test, y_test)
+    print('score = ', score)
+    print('accuracy = ', accuracy)
