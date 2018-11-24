@@ -26,12 +26,9 @@ def open_link(link):
 
 
 corpus = []
-data = []
 for i in range(0, len(X)):
     content = open_link(''.join(X[i]))
-    data.append(content)
     page = re.sub('[^\u0627-\u064a]', ' ', str(content))
-    # print(page)
     page = page.lower()
     page = page.split()
     ps = PorterStemmer()
