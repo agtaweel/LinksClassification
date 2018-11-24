@@ -13,8 +13,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.preprocessing import Imputer
-
 
 nltk.download('stopwords')
 
