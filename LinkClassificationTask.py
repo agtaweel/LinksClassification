@@ -15,7 +15,6 @@ nltk.download('stopwords')
 dataset = pd.read_csv('Dataset.csv')
 X = dataset.iloc[:, :-1].values
 y = dataset.iloc[:, 1].values
-# X = pd.DataFrame(X)
 
 # Get link data
 
@@ -31,7 +30,6 @@ data = []
 for i in range(0, len(X)):
     content = open_link(''.join(X[i]))
     data.append(content)
-    # print(str(content))
     page = re.sub('[^\u0627-\u064a]', ' ', str(content))
     # print(page)
     page = page.lower()
@@ -39,9 +37,7 @@ for i in range(0, len(X)):
     ps = PorterStemmer()
     page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
     page = ' '.join(page)
-    # print(page)
     corpus.append(page)
-    print(i)
 
 # Creating Bag of Words model
 from sklearn.feature_extraction.text import CountVectorizer
