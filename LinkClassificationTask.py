@@ -13,6 +13,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score, f1_score
+from sklearn.preprocessing import Imputer
 
 nltk.download('stopwords')
 
@@ -20,6 +21,8 @@ nltk.download('stopwords')
 print('reading data')
 dataset = pd.read_csv('Dataset.csv')
 x = dataset.iloc[:, :-1].values
+imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
+dataset['class'] = imputer.fit_transform(dataset[['class']]).ravel()
 y = dataset.iloc[:, 1].values
 print('data was read')
 # Get link data
