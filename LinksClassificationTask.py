@@ -16,27 +16,18 @@ from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import Imputer
 
 nltk.download('stopwords')
+filename = 'finalized_model.sav'
+
 
 # Importing the dataset
-print('reading data')
-dataset = pd.read_csv('Dataset.csv')
-x = dataset.iloc[:, :-1].values
-imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
-dataset['class'] = imputer.fit_transform(dataset[['class']]).ravel()
-y = dataset.iloc[:, 1].values
-print('data was read')
-# Get link data
 
 
-def open_link(link):
-    f = requests.get(link)
-    page = BeautifulSoup(f.content, 'html.parser')
-    return page
-
-
-def train_data(x, dataset):
-    print('start training data')
-
+def read_data(path):
+    print('reading data')
+    dataset = pd.read_csv(path)
+    imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
+    dataset['class'] = imputer.fit_transform(dataset[['class']]).ravel()
+    x = dataset.iloc[:, :-1].values
     corpus = []
     for i in range(0, len(x)):
         content = open_link(''.join(x[i]))
@@ -47,27 +38,45 @@ def train_data(x, dataset):
         page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
         page = ' '.join(page)
         corpus.append(page)
-        print((i+1)/len(x)*100, '%')
-
-    # Creating Bag of Words model
-    cv = CountVectorizer(max_features=1500)
-    x = cv.fit_transform(corpus).toarray()
+        print((i + 1) / len(x) * 100, '%')
+        print(i+2)
+    x = bag_of_words(corpus)
     y = dataset.iloc[:, 1].values
-
     # Splitting the dataset into the Training set and Test set
     print('splitting data')
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.20, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=0)
+    print('data was read')
+    return x_train, x_test, y_train, y_test, x
 
+
+# Creating Bag of Words model
+def bag_of_words(corpus):
+    cv = CountVectorizer(max_features=1500)
+    x = cv.fit_transform(corpus).toarray()
+    return x
+
+
+# Get link data
+
+
+def open_link(link):
+        f = requests.get(link)
+        page = BeautifulSoup(f.content, 'html.parser')
+        return page
+
+
+def train_data(x_train, y_train):
+
+    print('start training data')
     # Fitting Naive Bayes to the Training set
     classifier = GaussianNB()
     print('fitting data')
     classifier.fit(x_train, y_train)
 
     # save the model to disk
-    filename = 'finalized_model.sav'
     pickle.dump(classifier, open(filename, 'wb'))
     print('training finished')
-    return classifier, x_test, y_test
+    return classifier
 
 
 def get_results(classifier, x_test, y_test):
@@ -80,7 +89,8 @@ def get_results(classifier, x_test, y_test):
 
 
 if __name__ == "__main__":
-    classifier, x_test, y_test = train_data(x, dataset)
+    x_train, x_test, y_train, y_test,x = read_data('Dataset.csv')
+    classifier = train_data(x_train, y_train)
     score, accuracy = get_results(classifier, x_test, y_test)
-    print('score = ', score)
-    print('accuracy = ', accuracy)
+    print('score = ', score*100, '%')
+    print('accuracy = ', accuracy*100, '%')
