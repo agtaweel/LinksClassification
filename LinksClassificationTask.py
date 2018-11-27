@@ -44,7 +44,7 @@ def read_data(path):
     y = dataset.iloc[:, 1].values
     # Splitting the dataset into the Training set and Test set
     print('splitting data')
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=0)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=0, shuffle=True)
     print('data was read')
     return x_train, x_test, y_train, y_test, x
 
