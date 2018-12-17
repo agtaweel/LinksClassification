@@ -1,5 +1,3 @@
-# Data PreProcessing
-
 # Importing the libraries
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -8,7 +6,6 @@ import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
@@ -20,16 +17,15 @@ filename = 'finalized_model.sav'
 
 
 # Importing the dataset
-
-
 def read_data(path):
+
     print('reading data')
     dataset = pd.read_csv(path)
     # Taking care of missing data
     imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
     dataset['class'] = imputer.fit_transform(dataset[['class']]).ravel()
     x = dataset.iloc[:, :-1].values
-
+    print('Start bag of words')
     x = bag_of_words(x)
     y = dataset.iloc[:, 1].values
     # Splitting the dataset into the Training set and Test set
@@ -41,11 +37,12 @@ def read_data(path):
 
 # Creating Bag of Words model
 def bag_of_words(x):
+
     corpus = []
     for i in range(0, len(x)):
         try:
             content = open_link(''.join(x[i]))
-        except Exception    :
+        except Exception:
             pass
         page = re.sub('[^\u0627-\u064a]', ' ', str(content))
         page = page.lower()
@@ -64,14 +61,14 @@ def bag_of_words(x):
 
 
 # Get link data
-
-
 def open_link(link):
+
         f = requests.get(link)
         page = BeautifulSoup(f.content, 'html.parser')
         return page
 
 
+# Train data
 def train_data(x_train, y_train):
 
     print('start training data')
@@ -79,9 +76,6 @@ def train_data(x_train, y_train):
     classifier = GaussianNB()
     print('fitting data')
     classifier.fit(x_train, y_train)
-
-    # save the model to disk
-    pickle.dump(classifier, open(filename, 'wb'))
     print('training finished')
     return classifier
 
