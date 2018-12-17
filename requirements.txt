@@ -1,0 +1,7 @@
+pandas
+numpy
+scikit_learn
+bs4
+requests
+re
+nltk

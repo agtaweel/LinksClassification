@@ -13,7 +13,6 @@ from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import Imputer
 
 nltk.download('stopwords')
-filename = 'finalized_model.sav'
 
 
 # Importing the dataset
