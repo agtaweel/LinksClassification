@@ -25,22 +25,12 @@ filename = 'finalized_model.sav'
 def read_data(path):
     print('reading data')
     dataset = pd.read_csv(path)
+    # Taking care of missing data
     imputer = Imputer(missing_values = 'NaN', strategy = 'most_frequent', axis = 0)
     dataset['class'] = imputer.fit_transform(dataset[['class']]).ravel()
     x = dataset.iloc[:, :-1].values
-    corpus = []
-    for i in range(0, len(x)):
-        content = open_link(''.join(x[i]))
-        page = re.sub('[^\u0627-\u064a]', ' ', str(content))
-        page = page.lower()
-        page = page.split()
-        ps = PorterStemmer()
-        page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
-        page = ' '.join(page)
-        corpus.append(page)
-        print((i + 1) / len(x) * 100, '%')
-        print(i+2)
-    x = bag_of_words(corpus)
+
+    x = bag_of_words(x)
     y = dataset.iloc[:, 1].values
     # Splitting the dataset into the Training set and Test set
     print('splitting data')
@@ -50,9 +40,26 @@ def read_data(path):
 
 
 # Creating Bag of Words model
-def bag_of_words(corpus):
+def bag_of_words(x):
+    corpus = []
+    for i in range(0, len(x)):
+        try:
+            content = open_link(''.join(x[i]))
+        except Exception    :
+            pass
+        page = re.sub('[^\u0627-\u064a]', ' ', str(content))
+        page = page.lower()
+        page = page.split()
+        ps = PorterStemmer()
+        page = [ps.stem(word) for word in page if not word in set(stopwords.words('arabic'))]
+        page = ' '.join(page)
+        corpus.append(page)
+        print((i + 1) / len(x) * 100, '%')
+        print(i + 2)
+
     cv = CountVectorizer(max_features=1500)
     x = cv.fit_transform(corpus).toarray()
+
     return x
 
 
